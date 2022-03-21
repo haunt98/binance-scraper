@@ -46,10 +46,10 @@ func (s *service) AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeM
 	if err != nil {
 		return fmt.Errorf("failed to parse duration: %w", err)
 	}
-	duration := duration15m * defaultLimit
+	durationMs := duration15m.Milliseconds() * defaultLimit
 
 	for startTimeMs < endTimeMs {
-		currentEndTimeMs := startTimeMs + int64(duration)
+		currentEndTimeMs := startTimeMs + durationMs
 		if currentEndTimeMs > endTimeMs {
 			currentEndTimeMs = endTimeMs
 		}
@@ -80,7 +80,7 @@ func (s *service) AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeM
 			}
 		}
 
-		startTimeMs += int64(duration)
+		startTimeMs += durationMs
 
 		// TODO: better handle sleep
 		time.Sleep(defaultSleep)
