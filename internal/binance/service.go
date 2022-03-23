@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	binanceapi "github.com/haunt98/binance-api-go"
@@ -104,8 +105,7 @@ func (s *service) ValidateBTCUSDT_15m(ctx context.Context) error {
 
 	for i := 0; i < len(candlesticks)-1; i++ {
 		if candlesticks[i].OpenTimeMs+duration15mInMs != candlesticks[i+1].OpenTimeMs {
-			fmt.Println("XXX", i)
-			return fmt.Errorf("missing open time: %d", candlesticks[i].OpenTimeMs+duration15mInMs)
+			log.Printf("ValidateBTCUSDT_15m: exist open time %d but missing open time %d", candlesticks[i].OpenTimeMs, candlesticks[i].OpenTimeMs+duration15mInMs)
 		}
 	}
 
