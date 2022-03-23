@@ -71,7 +71,7 @@ func (s *service) AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeM
 			}
 
 			// If exist, skip
-			if _, err := s.repo.GetBTCUSDT_15m(ctx, candlestick.OpenTimeMs); err == nil {
+			if _, err := s.repo.GetSingleBTCUSDT_15m(ctx, candlestick.OpenTimeMs); err == nil {
 				continue
 			}
 

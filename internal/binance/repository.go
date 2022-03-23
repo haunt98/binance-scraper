@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	preparedInsertBTCUSDT_15m = "InsertBTCUSDT_15m"
-	preparedGetBTCUSDT_15m    = "GetBTCUSDT_15m"
+	preparedInsertBTCUSDT_15m    = "InsertBTCUSDT_15m"
+	preparedGetSingleBTCUSDT_15m = "GetSingleBTCUSDT_15m"
 
 	stmtInitBTCUSDT_15m = `
 CREATE TABLE BTCUSDT_15m
@@ -23,7 +23,7 @@ CREATE TABLE BTCUSDT_15m
     volume    TEXT
 )
 `
-	stmtGetBTCUSDT_15m = `
+	stmtGetSingleBTCUSDT_15m = `
 SELECT open_time_ms, open, high, low, close, volume
 FROM BTCUSDT_15m
 WHERE open_time_ms = ?
@@ -35,7 +35,7 @@ VALUES (?, ?, ?, ?, ?, ?)
 )
 
 type Repository interface {
-	GetBTCUSDT_15m(ctx context.Context, openTimeMs int64) (binanceapi.Candlestick, error)
+	GetSingleBTCUSDT_15m(ctx context.Context, openTimeMs int64) (binanceapi.Candlestick, error)
 	InsertBTCUSDT_15m(ctx context.Context, candlestick binanceapi.Candlestick) error
 }
 
@@ -56,7 +56,7 @@ func NewRepository(ctx context.Context, db *sql.DB, shouldInitDatabase bool) (Re
 
 	var err error
 	preparedStmts := make(map[string]*sql.Stmt)
-	preparedStmts[preparedGetBTCUSDT_15m], err = db.PrepareContext(ctx, stmtGetBTCUSDT_15m)
+	preparedStmts[preparedGetSingleBTCUSDT_15m], err = db.PrepareContext(ctx, stmtGetSingleBTCUSDT_15m)
 	if err != nil {
 		return nil, fmt.Errorf("database failed to prepare context: %w", err)
 	}
@@ -72,10 +72,10 @@ func NewRepository(ctx context.Context, db *sql.DB, shouldInitDatabase bool) (Re
 	}, nil
 }
 
-func (r *repo) GetBTCUSDT_15m(ctx context.Context, openTimeMs int64) (binanceapi.Candlestick, error) {
+func (r *repo) GetSingleBTCUSDT_15m(ctx context.Context, openTimeMs int64) (binanceapi.Candlestick, error) {
 	candlestick := binanceapi.Candlestick{}
 
-	row := r.preparedStmts[preparedGetBTCUSDT_15m].QueryRowContext(ctx, openTimeMs)
+	row := r.preparedStmts[preparedGetSingleBTCUSDT_15m].QueryRowContext(ctx, openTimeMs)
 	if err := row.Scan(
 		&candlestick.OpenTimeMs,
 		&candlestick.Open,
