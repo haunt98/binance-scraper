@@ -23,6 +23,11 @@ CREATE TABLE BTCUSDT_15m
     volume    TEXT
 )
 `
+	stmtGetAllBTCUSDT_15m = `
+SELECT open_time_ms, open, high, low, close, volume
+FROM BTCUSDT_15m
+ORDER BY open_time_ms ASC;
+`
 	stmtGetSingleBTCUSDT_15m = `
 SELECT open_time_ms, open, high, low, close, volume
 FROM BTCUSDT_15m
@@ -35,6 +40,7 @@ VALUES (?, ?, ?, ?, ?, ?)
 )
 
 type Repository interface {
+	GetAllBTCUSDT_15m(ctx context.Context) ([]binanceapi.Candlestick, error)
 	GetSingleBTCUSDT_15m(ctx context.Context, openTimeMs int64) (binanceapi.Candlestick, error)
 	InsertBTCUSDT_15m(ctx context.Context, candlestick binanceapi.Candlestick) error
 }
@@ -70,6 +76,37 @@ func NewRepository(ctx context.Context, db *sql.DB, shouldInitDatabase bool) (Re
 		db:            db,
 		preparedStmts: preparedStmts,
 	}, nil
+}
+
+func (r *repo) GetAllBTCUSDT_15m(ctx context.Context) ([]binanceapi.Candlestick, error) {
+	candlesticks := []binanceapi.Candlestick{}
+
+	rows, err := r.db.QueryContext(ctx, stmtGetAllBTCUSDT_15m)
+	if err != nil {
+		return nil, fmt.Errorf("database failed to query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		candlestick := binanceapi.Candlestick{}
+		if err := rows.Scan(
+			&candlestick.OpenTimeMs,
+			&candlestick.Open,
+			&candlestick.High,
+			&candlestick.Low,
+			&candlestick.Close,
+			&candlestick.Volume,
+		); err != nil {
+			return nil, fmt.Errorf("database failed to scan row: %w", err)
+		}
+
+		candlesticks = append(candlesticks, candlestick)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("database failed to scan rows: %w", err)
+	}
+
+	return candlesticks, nil
 }
 
 func (r *repo) GetSingleBTCUSDT_15m(ctx context.Context, openTimeMs int64) (binanceapi.Candlestick, error) {

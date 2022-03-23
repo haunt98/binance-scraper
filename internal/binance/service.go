@@ -20,6 +20,7 @@ const (
 
 type Service interface {
 	AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeMs int64) error
+	ValidateBTCUSDT_15m(ctx context.Context) error
 }
 
 type service struct {
@@ -62,7 +63,7 @@ func (s *service) AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeM
 			Limit:       defaultLimit,
 		})
 		if err != nil {
-			return fmt.Errorf("failed to get candlestick: %w", err)
+			return fmt.Errorf("failed to get single candlestick: %w", err)
 		}
 
 		for _, candlestick := range getCandlestickRsp.Candlesticks {
@@ -84,6 +85,28 @@ func (s *service) AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeM
 
 		// TODO: better handle sleep
 		time.Sleep(defaultSleep)
+	}
+
+	return nil
+}
+
+func (s *service) ValidateBTCUSDT_15m(ctx context.Context) error {
+	candlesticks, err := s.repo.GetAllBTCUSDT_15m(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get all BTCUSDT_15m: %w", err)
+	}
+
+	duration15m, err := time.ParseDuration(interval15m)
+	if err != nil {
+		return fmt.Errorf("failed to parse duration: %w", err)
+	}
+	duration15mInMs := duration15m.Milliseconds()
+
+	for i := 0; i < len(candlesticks)-1; i++ {
+		if candlesticks[i].OpenTimeMs+duration15mInMs != candlesticks[i+1].OpenTimeMs {
+			fmt.Println("XXX", i)
+			return fmt.Errorf("missing open time: %d", candlesticks[i].OpenTimeMs+duration15mInMs)
+		}
 	}
 
 	return nil

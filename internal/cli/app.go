@@ -18,8 +18,11 @@ const (
 	Name  = "binance-scraper"
 	usage = "get data from Binance"
 
-	commandAdd = "add"
-	usageAdd   = "add BTCUSDT_15m"
+	commandAdd      = "add"
+	commandValidate = "validate"
+
+	usageAdd      = "add data"
+	usageValidate = "validate data"
 )
 
 type App struct {
@@ -52,7 +55,12 @@ func NewApp(db *sql.DB, shouldInitDatabase bool) (*App, error) {
 			{
 				Name:   commandAdd,
 				Usage:  usageAdd,
-				Action: a.RunAddBTCUSDT_15m,
+				Action: a.RunAdd,
+			},
+			{
+				Name:   commandValidate,
+				Usage:  usageValidate,
+				Action: a.RunValidate,
 			},
 		},
 	}

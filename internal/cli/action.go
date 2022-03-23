@@ -13,6 +13,10 @@ func (a *action) RunHelp(c *cli.Context) error {
 	return cli.ShowAppHelp(c)
 }
 
-func (a *action) RunAddBTCUSDT_15m(c *cli.Context) error {
-	return a.handler.AddMultiBTCUSDT_15m(c.Context)
+func (a *action) RunAdd(c *cli.Context) error {
+	return a.handler.Add(c.Context)
+}
+
+func (a *action) RunValidate(c *cli.Context) error {
+	return a.handler.Validate(c.Context)
 }
