@@ -11,6 +11,7 @@ import (
 type Handler interface {
 	Add(ctx context.Context) error
 	Validate(ctx context.Context) error
+	Export(ctx context.Context) error
 }
 
 type handler struct {
@@ -39,6 +40,14 @@ func (h *handler) Add(ctx context.Context) error {
 
 func (h *handler) Validate(ctx context.Context) error {
 	if err := h.service.ValidateBTCUSDT_15m(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *handler) Export(ctx context.Context) error {
+	if err := h.service.ExportCSVBTCUSDT_15m(ctx, "btcusdt_15m.csv"); err != nil {
 		return err
 	}
 

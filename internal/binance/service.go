@@ -2,9 +2,11 @@ package binance
 
 import (
 	"context"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	binanceapi "github.com/haunt98/binance-api-go"
@@ -17,11 +19,15 @@ const (
 
 	// Binance can block if you spam request
 	defaultSleep = time.Second
+
+	// Custom
+	timeLayout = "2006-01-02 15:04:05"
 )
 
 type Service interface {
 	AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeMs int64) error
 	ValidateBTCUSDT_15m(ctx context.Context) error
+	ExportCSVBTCUSDT_15m(ctx context.Context, filename string) error
 }
 
 type service struct {
@@ -112,6 +118,42 @@ func (s *service) ValidateBTCUSDT_15m(ctx context.Context) error {
 	return nil
 }
 
+func (s *service) ExportCSVBTCUSDT_15m(ctx context.Context, filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+
+	csvWriter := csv.NewWriter(file)
+
+	if err := csvWriter.Write([]string{"open_time", "open", "high", "low", "close", "volume"}); err != nil {
+		return fmt.Errorf("failed to write header: %w", err)
+	}
+
+	candlesticks, err := s.repo.GetAllBTCUSDT_15m(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get all BTCUSDT_15m: %w", err)
+	}
+
+	for _, candlestick := range candlesticks {
+		if err := csvWriter.Write([]string{
+			timeUTCFromMillisecond(candlestick.OpenTimeMs).Format(timeLayout),
+			candlestick.Open,
+			candlestick.High,
+			candlestick.Low,
+			candlestick.Close,
+			candlestick.Volume,
+		}); err != nil {
+			return fmt.Errorf("failed to write candlestick: %w", err)
+		}
+	}
+
+	csvWriter.Flush()
+	file.Close()
+
+	return nil
+}
+
 func validateCandlestick(candlestick binanceapi.Candlestick) error {
 	if candlestick.OpenTimeMs == 0 {
 		return errors.New("invalid open time")
@@ -138,4 +180,8 @@ func validateCandlestick(candlestick binanceapi.Candlestick) error {
 	}
 
 	return nil
+}
+
+func timeUTCFromMillisecond(ms int64) time.Time {
+	return time.Unix(0, ms*int64(time.Millisecond)).UTC()
 }

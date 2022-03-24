@@ -20,3 +20,7 @@ func (a *action) RunAdd(c *cli.Context) error {
 func (a *action) RunValidate(c *cli.Context) error {
 	return a.handler.Validate(c.Context)
 }
+
+func (a *action) RunExport(c *cli.Context) error {
+	return a.handler.Export(c.Context)
+}

@@ -20,9 +20,11 @@ const (
 
 	commandAdd      = "add"
 	commandValidate = "validate"
+	commandExport   = "export"
 
 	usageAdd      = "add data"
 	usageValidate = "validate data"
+	usageExport   = "export data"
 )
 
 type App struct {
@@ -61,6 +63,11 @@ func NewApp(db *sql.DB, shouldInitDatabase bool) (*App, error) {
 				Name:   commandValidate,
 				Usage:  usageValidate,
 				Action: a.RunValidate,
+			},
+			{
+				Name:   commandExport,
+				Usage:  usageExport,
+				Action: a.RunExport,
 			},
 		},
 	}
