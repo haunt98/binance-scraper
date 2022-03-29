@@ -13,14 +13,12 @@ const (
 	preparedGetSingleBTCUSDT_15m = "GetSingleBTCUSDT_15m"
 
 	stmtInitBTCUSDT_15m = `
-CREATE TABLE BTCUSDT_15m
+CREATE TABLE IF NOT EXISTS investments
 (
-    open_time_ms INTEGER PRIMARY KEY,
-    open      TEXT,
-    high      TEXT,
-    low       TEXT,
-    close     TEXT,
-    volume    TEXT
+    id     TEXT PRIMARY KEY,
+    amount INTEGER NOT NULL,
+    date   TEXT    NOT NULL,
+    source TEXT    NOT NULL
 )
 `
 	stmtGetAllBTCUSDT_15m = `
@@ -53,11 +51,9 @@ type repo struct {
 	preparedStmts map[string]*sql.Stmt
 }
 
-func NewRepository(ctx context.Context, db *sql.DB, shouldInitDatabase bool) (Repository, error) {
-	if shouldInitDatabase {
-		if _, err := db.ExecContext(ctx, stmtInitBTCUSDT_15m); err != nil {
-			return nil, fmt.Errorf("database failed to exec: %w", err)
-		}
+func NewRepository(ctx context.Context, db *sql.DB) (Repository, error) {
+	if _, err := db.ExecContext(ctx, stmtInitBTCUSDT_15m); err != nil {
+		return nil, fmt.Errorf("database failed to exec: %w", err)
 	}
 
 	var err error

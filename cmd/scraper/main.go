@@ -2,9 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"errors"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/haunt98/binance-scraper/internal/cli"
@@ -14,22 +12,13 @@ import (
 const dataFilename = "data.sqlite3"
 
 func main() {
-	shouldInitDatabase := false
-	if _, err := os.Stat(getDataFilePath()); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			shouldInitDatabase = true
-		} else {
-			log.Fatalln(err)
-		}
-	}
-
 	db, err := sql.Open("sqlite3", getDataFilePath())
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer db.Close()
 
-	app, err := cli.NewApp(db, shouldInitDatabase)
+	app, err := cli.NewApp(db)
 	if err != nil {
 		log.Fatalln(err)
 	}
