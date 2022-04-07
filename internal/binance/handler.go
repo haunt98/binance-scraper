@@ -3,10 +3,14 @@ package binance
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/make-go-great/ioe-go"
 	"github.com/spf13/cast"
 )
+
+const nowTime = "now"
 
 type Handler interface {
 	Add(ctx context.Context) error
@@ -28,8 +32,14 @@ func (h *handler) Add(ctx context.Context) error {
 	fmt.Printf("Input startTimeMs: ")
 	startTimeMs := cast.ToInt64(ioe.ReadInput())
 
-	fmt.Printf("Input endTimeMs: ")
-	endTimeMs := cast.ToInt64(ioe.ReadInput())
+	fmt.Printf("Input endTimeMs, or now: ")
+	endTimeMsStr := ioe.ReadInput()
+	var endTimeMs int64
+	if strings.EqualFold(endTimeMsStr, nowTime) {
+		endTimeMs = time.Now().UnixMilli()
+	} else {
+		endTimeMs = cast.ToInt64(endTimeMsStr)
+	}
 
 	if err := h.service.AddMultiBTCUSDT_15m(ctx, startTimeMs, endTimeMs); err != nil {
 		return err
