@@ -26,6 +26,7 @@ const (
 
 type Service interface {
 	AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeMs int64) error
+	AddTillNowMultiBTCUSDT_15m(ctx context.Context) error
 	ValidateBTCUSDT_15m(ctx context.Context) error
 	ExportCSVBTCUSDT_15m(ctx context.Context, filename string) error
 }
@@ -95,6 +96,21 @@ func (s *service) AddMultiBTCUSDT_15m(ctx context.Context, startTimeMs, endTimeM
 	}
 
 	return nil
+}
+
+func (s *service) AddTillNowMultiBTCUSDT_15m(ctx context.Context) error {
+	candlesticks, err := s.repo.GetAllDescBTCUSDT_15m(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get all desc BTCUSDT_15m: %w", err)
+	}
+
+	if len(candlesticks) == 0 {
+		return nil
+	}
+
+	latestTimeMs := candlesticks[0].OpenTimeMs
+
+	return s.AddMultiBTCUSDT_15m(ctx, latestTimeMs, time.Now().UnixMilli())
 }
 
 func (s *service) ValidateBTCUSDT_15m(ctx context.Context) error {

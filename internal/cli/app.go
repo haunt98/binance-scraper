@@ -18,13 +18,15 @@ const (
 	Name  = "binance-scraper"
 	usage = "get data from Binance"
 
-	commandAdd      = "add"
-	commandValidate = "validate"
-	commandExport   = "export"
+	commandAdd        = "add"
+	commandAddTillNow = "add-till-now"
+	commandValidate   = "validate"
+	commandExport     = "export"
 
-	usageAdd      = "add data"
-	usageValidate = "validate data"
-	usageExport   = "export data"
+	usageAdd        = "add data"
+	usageAddTillNow = "add data from latest timestamp to now"
+	usageValidate   = "validate data"
+	usageExport     = "export data"
 )
 
 type App struct {
@@ -58,6 +60,11 @@ func NewApp(db *sql.DB) (*App, error) {
 				Name:   commandAdd,
 				Usage:  usageAdd,
 				Action: a.RunAdd,
+			},
+			{
+				Name:   commandAddTillNow,
+				Usage:  usageAddTillNow,
+				Action: a.RunnAddTillNow,
 			},
 			{
 				Name:   commandValidate,

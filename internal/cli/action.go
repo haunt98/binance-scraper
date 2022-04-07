@@ -17,6 +17,10 @@ func (a *action) RunAdd(c *cli.Context) error {
 	return a.handler.Add(c.Context)
 }
 
+func (a *action) RunnAddTillNow(c *cli.Context) error {
+	return a.handler.AddTillNow(c.Context)
+}
+
 func (a *action) RunValidate(c *cli.Context) error {
 	return a.handler.Validate(c.Context)
 }

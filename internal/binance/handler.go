@@ -14,6 +14,7 @@ const nowTime = "now"
 
 type Handler interface {
 	Add(ctx context.Context) error
+	AddTillNow(ctx context.Context) error
 	Validate(ctx context.Context) error
 	Export(ctx context.Context) error
 }
@@ -42,6 +43,14 @@ func (h *handler) Add(ctx context.Context) error {
 	}
 
 	if err := h.service.AddMultiBTCUSDT_15m(ctx, startTimeMs, endTimeMs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *handler) AddTillNow(ctx context.Context) error {
+	if err := h.service.AddTillNowMultiBTCUSDT_15m(ctx); err != nil {
 		return err
 	}
 
